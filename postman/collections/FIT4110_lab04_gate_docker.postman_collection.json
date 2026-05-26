@@ -1,0 +1,469 @@
+{
+  "info": {
+    "name": "FIT4110 Lab04 Gate Docker Verification",
+    "description": "Verifies the Dockerized Access Gate service against the Pair 10 Gate/Core access policy OpenAPI contract.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01_Functional",
+      "item": [
+        {
+          "name": "GET health returns 200",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Health schema is valid', function () { const json = pm.response.json(); pm.expect(json.status).to.eql('ok'); pm.expect(json.service).to.eql('access-gate'); pm.expect(json.time).to.be.a('string'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST access check ALLOW returns 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/check",
+              "host": ["{{baseUrl}}"],
+              "path": ["access", "check"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardId\": \"RFID-2026-001\",\n  \"gateId\": \"GATE-01\",\n  \"direction\": \"IN\",\n  \"timestamp\": \"2026-05-10T08:00:00Z\",\n  \"idempotencyKey\": \"{{idempotencyKey}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Access decision schema is valid', function () { const json = pm.response.json(); pm.expect(json.decisionId).to.be.a('string'); pm.expect(json.decision).to.eql('ALLOW'); pm.expect(json.policyId).to.be.a('string'); pm.expect(json.checkedAt).to.be.a('string'); pm.environment.set('createdDecisionId', json.decisionId); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST access check DENY returns 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/check",
+              "host": ["{{baseUrl}}"],
+              "path": ["access", "check"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardId\": \"RFID-2026-042\",\n  \"gateId\": \"GATE-03\",\n  \"direction\": \"OUT\",\n  \"timestamp\": \"2026-05-10T17:30:00Z\",\n  \"idempotencyKey\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Deny decision schema is valid', function () { const json = pm.response.json(); pm.expect(json.decision).to.eql('DENY'); pm.expect(json.reasonCode).to.eql('CARD_EXPIRED'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET access policies returns page",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/access?limit=20&status=ACTIVE",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", "access"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Policy page schema is valid', function () { const json = pm.response.json(); pm.expect(json.items).to.be.an('array'); pm.expect(json.items.length).to.be.above(0); pm.expect(json.hasMore).to.eql(false); pm.environment.set('policyId', json.items[0].policyId); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET access policy by id returns policy",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/access/{{policyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", "access", "{{policyId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Policy detail schema is valid', function () { const json = pm.response.json(); pm.expect(json.policyId).to.eql(pm.environment.get('policyId')); pm.expect(json.rules).to.be.an('array'); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET decisions returns page",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/decisions?limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["decisions"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Decision page schema is valid', function () { const json = pm.response.json(); pm.expect(json.items).to.be.an('array'); pm.expect(json.hasMore).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET decision by id returns detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/decisions/{{createdDecisionId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["decisions", "{{createdDecisionId}}"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Decision detail schema is valid', function () { const json = pm.response.json(); pm.expect(json.decisionId).to.eql(pm.environment.get('createdDecisionId')); pm.expect(json.cardId).to.eql('RFID-2026-001'); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02_Auth_Negative_Boundary",
+      "item": [
+        {
+          "name": "GET decisions without token returns 401 Problem",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/decisions",
+              "host": ["{{baseUrl}}"],
+              "path": ["decisions"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.environment.get('env') === 'mock') {",
+                  "  pm.test('Mock response is documented', function () { pm.expect([200, 401]).to.include(pm.response.code); });",
+                  "} else {",
+                  "  pm.test('Status code is 401', function () { pm.response.to.have.status(401); });",
+                  "  const json = pm.response.json();",
+                  "  pm.test('Problem schema is valid', function () { pm.expect(json.type).to.be.a('string'); pm.expect(json.title).to.be.a('string'); pm.expect(json.status).to.eql(401); pm.expect(json.errors).to.be.an('array'); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST duplicate idempotency key returns 409",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/check",
+              "host": ["{{baseUrl}}"],
+              "path": ["access", "check"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardId\": \"RFID-2026-001\",\n  \"gateId\": \"GATE-01\",\n  \"direction\": \"IN\",\n  \"timestamp\": \"2026-05-10T08:00:00Z\",\n  \"idempotencyKey\": \"{{idempotencyKey}}\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.environment.get('env') === 'mock') {",
+                  "  pm.test('Mock response is documented', function () { pm.expect([200, 409]).to.include(pm.response.code); });",
+                  "} else {",
+                  "  pm.test('Status code is 409', function () { pm.response.to.have.status(409); });",
+                  "  const json = pm.response.json();",
+                  "  pm.test('Problem schema is valid', function () { pm.expect(json.type).to.be.a('string'); pm.expect(json.title).to.be.a('string'); pm.expect(json.status).to.eql(409); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST invalid cardId returns 422",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/access/check",
+              "host": ["{{baseUrl}}"],
+              "path": ["access", "check"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cardId\": \"BAD-CARD\",\n  \"gateId\": \"GATE-01\",\n  \"direction\": \"IN\",\n  \"timestamp\": \"2026-05-10T08:00:00Z\",\n  \"idempotencyKey\": null\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.environment.get('env') === 'mock') {",
+                  "  pm.test('Mock response is documented', function () { pm.expect([200, 400, 422]).to.include(pm.response.code); });",
+                  "} else {",
+                  "  pm.test('Status code is 422', function () { pm.response.to.have.status(422); });",
+                  "  const json = pm.response.json();",
+                  "  pm.test('Problem schema is valid', function () { pm.expect(json.type).to.be.a('string'); pm.expect(json.title).to.be.a('string'); pm.expect(json.status).to.eql(422); pm.expect(json.errors).to.be.an('array'); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET policies boundary limit 100 returns 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/access?limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", "access"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "100"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET policies invalid limit 101 returns 422",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policies/access?limit=101",
+              "host": ["{{baseUrl}}"],
+              "path": ["policies", "access"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "101"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.environment.get('env') === 'mock') {",
+                  "  pm.test('Mock response is documented', function () { pm.expect([200, 400, 422]).to.include(pm.response.code); });",
+                  "} else {",
+                  "  pm.test('Status code is 422', function () { pm.response.to.have.status(422); });",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET missing decision returns 404 Problem",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/decisions/0196fb3d-4ad7-7d1e-9f49-5d5148d2ffff",
+              "host": ["{{baseUrl}}"],
+              "path": ["decisions", "0196fb3d-4ad7-7d1e-9f49-5d5148d2ffff"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.environment.get('env') === 'mock') {",
+                  "  pm.test('Mock response is documented', function () { pm.expect([200, 404]).to.include(pm.response.code); });",
+                  "} else {",
+                  "  pm.test('Status code is 404', function () { pm.response.to.have.status(404); });",
+                  "  const json = pm.response.json();",
+                  "  pm.test('Problem schema is valid', function () { pm.expect(json.type).to.be.a('string'); pm.expect(json.title).to.be.a('string'); pm.expect(json.status).to.eql(404); });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

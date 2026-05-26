@@ -1,0 +1,15 @@
+rules:
+  info-title-required:
+    description: OpenAPI info.title must be present.
+    given: $.info
+    severity: error
+    then:
+      field: title
+      function: truthy
+  paths-required:
+    description: OpenAPI paths must be present.
+    given: $
+    severity: error
+    then:
+      field: paths
+      function: truthy

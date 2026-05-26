@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="FIT4110 Lab04 Gate Docker Verification" tests="13" time="0.142">
+  <testsuite name="01_Functional / GET health returns 200" id="2b177fa8-5862-4762-b1ee-12a7d77ab991" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.042">
+    <testcase name="Status code is 200" time="0.042" classname="01FunctionalGetHealthReturns200"/>
+    <testcase name="Health schema is valid" time="0.042" classname="01FunctionalGetHealthReturns200"/>
+  </testsuite>
+  <testsuite name="01_Functional / POST access check ALLOW returns 200" id="ad752ea1-9d55-47d2-833d-98a93ad654b3" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.016">
+    <testcase name="Status code is 200" time="0.016" classname="01FunctionalPostAccessCheckAllowReturns200"/>
+    <testcase name="Access decision schema is valid" time="0.016" classname="01FunctionalPostAccessCheckAllowReturns200"/>
+  </testsuite>
+  <testsuite name="01_Functional / POST access check DENY returns 200" id="cc6126fe-c695-4d31-97f5-d98bf9aea95c" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="Status code is 200" time="0.008" classname="01FunctionalPostAccessCheckDenyReturns200"/>
+    <testcase name="Deny decision schema is valid" time="0.008" classname="01FunctionalPostAccessCheckDenyReturns200"/>
+  </testsuite>
+  <testsuite name="01_Functional / GET access policies returns page" id="9f3610b6-e211-496e-b02c-8f4363492789" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Status code is 200" time="0.007" classname="01FunctionalGetAccessPoliciesReturnsPage"/>
+    <testcase name="Policy page schema is valid" time="0.007" classname="01FunctionalGetAccessPoliciesReturnsPage"/>
+  </testsuite>
+  <testsuite name="01_Functional / GET access policy by id returns policy" id="604ba54d-1b7f-400a-b9cf-180a66da7700" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Status code is 200" time="0.007" classname="01FunctionalGetAccessPolicyByIdReturnsPolicy"/>
+    <testcase name="Policy detail schema is valid" time="0.007" classname="01FunctionalGetAccessPolicyByIdReturnsPolicy"/>
+  </testsuite>
+  <testsuite name="01_Functional / GET decisions returns page" id="7acaf2c5-5372-441a-a0ce-80c45bdb30d8" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.011">
+    <testcase name="Status code is 200" time="0.011" classname="01FunctionalGetDecisionsReturnsPage"/>
+    <testcase name="Decision page schema is valid" time="0.011" classname="01FunctionalGetDecisionsReturnsPage"/>
+  </testsuite>
+  <testsuite name="01_Functional / GET decision by id returns detail" id="87cb71f0-520b-46d7-947e-a429bb7b08f4" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.008">
+    <testcase name="Status code is 200" time="0.008" classname="01FunctionalGetDecisionByIdReturnsDetail"/>
+    <testcase name="Decision detail schema is valid" time="0.008" classname="01FunctionalGetDecisionByIdReturnsDetail"/>
+  </testsuite>
+  <testsuite name="02_Auth_Negative_Boundary / GET decisions without token returns 401 Problem" id="298e0a18-a797-4abe-9471-a6687b295b47" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.012">
+    <testcase name="Status code is 401" time="0.012" classname="02AuthNegativeBoundaryGetDecisionsWithoutTokenReturns401Problem"/>
+    <testcase name="Problem schema is valid" time="0.012" classname="02AuthNegativeBoundaryGetDecisionsWithoutTokenReturns401Problem"/>
+  </testsuite>
+  <testsuite name="02_Auth_Negative_Boundary / POST duplicate idempotency key returns 409" id="9ac5a2c3-9616-4970-af64-2dcbfe3d03e5" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Status code is 409" time="0.006" classname="02AuthNegativeBoundaryPostDuplicateIdempotencyKeyReturns409"/>
+    <testcase name="Problem schema is valid" time="0.006" classname="02AuthNegativeBoundaryPostDuplicateIdempotencyKeyReturns409"/>
+  </testsuite>
+  <testsuite name="02_Auth_Negative_Boundary / POST invalid cardId returns 422" id="80494e63-9aa6-4285-999e-118abacda847" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.009">
+    <testcase name="Status code is 422" time="0.009" classname="02AuthNegativeBoundaryPostInvalidCardIdReturns422"/>
+    <testcase name="Problem schema is valid" time="0.009" classname="02AuthNegativeBoundaryPostInvalidCardIdReturns422"/>
+  </testsuite>
+  <testsuite name="02_Auth_Negative_Boundary / GET policies boundary limit 100 returns 200" id="ff81ce11-6901-459c-bdf6-62827d6e1440" timestamp="2026-05-26T10:37:17.099Z" tests="1" failures="0" errors="0" time="0.007">
+    <testcase name="Status code is 200" time="0.007" classname="02AuthNegativeBoundaryGetPoliciesBoundaryLimit100Returns200"/>
+  </testsuite>
+  <testsuite name="02_Auth_Negative_Boundary / GET policies invalid limit 101 returns 422" id="ea77ca6a-a4b4-43c4-aba4-c74e79f7cfca" timestamp="2026-05-26T10:37:17.099Z" tests="1" failures="0" errors="0" time="0.004">
+    <testcase name="Status code is 422" time="0.004" classname="02AuthNegativeBoundaryGetPoliciesInvalidLimit101Returns422"/>
+  </testsuite>
+  <testsuite name="02_Auth_Negative_Boundary / GET missing decision returns 404 Problem" id="63fa7946-615b-423a-9b55-29966c013c65" timestamp="2026-05-26T10:37:17.099Z" tests="2" failures="0" errors="0" time="0.005">
+    <testcase name="Status code is 404" time="0.005" classname="02AuthNegativeBoundaryGetMissingDecisionReturns404Problem"/>
+    <testcase name="Problem schema is valid" time="0.005" classname="02AuthNegativeBoundaryGetMissingDecisionReturns404Problem"/>
+  </testsuite>
+</testsuites>
