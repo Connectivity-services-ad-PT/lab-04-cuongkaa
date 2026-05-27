@@ -36,7 +36,21 @@ jobs:
             fit4110/access-gate:lab04
 
       - name: Wait for service health
-        run: npx wait-on http://localhost:8000/health --timeout 30000
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://127.0.0.1:8000/health; then
+              exit 0
+            fi
+
+            echo "Waiting for Access Gate service... attempt ${i}/60"
+            docker ps -a --filter name=fit4110-gate-lab04
+            docker logs fit4110-gate-lab04 || true
+            sleep 2
+          done
+
+          docker inspect fit4110-gate-lab04 || true
+          docker logs fit4110-gate-lab04 || true
+          exit 1
 
       - name: Run Newman against Docker container
         run: npm run test:local
